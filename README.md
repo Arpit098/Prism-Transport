@@ -69,6 +69,17 @@ The error you see tells you *why* it failed:
 - **`Queue full, ...`** (in `error.cause`) — the indexer is overwhelmed. Slow down.
 - **`All RPCs failed for ...`** — every tier exhausted. Treat as a transient outage and retry.
 
+## Hardening
+
+The transport is built for indexers talking to mixed-quality public RPC endpoints, where any provider may misbehave at any time. Defaults are tuned with that adversarial setting in mind:
+
+- **API keys never leak in error messages.** When a paid provider returns a contract revert, the `RpcRequestError` thrown to the caller carries only the URL's origin (`https://host`) — path, query string, and basic-auth userinfo are stripped. Safe to forward to Sentry, Datadog, or structured logs.
+- **Response size is enforced via streaming.** `maxResponseBytes` (default 50 MiB) is checked against the actual bytes received, not just the `Content-Length` header — a chunked-encoding response or a lying header can't OOM the indexer.
+- **Stats output is hostname-redacted.** Every URL that reaches `getStats()`, `registry.getAllStats()`, and the cross-worker stats files is reduced to its hostname before serialisation. Safe to expose on a `/metrics` endpoint.
+- **Method counter cardinality is bounded.** `methodCounters` accepts at most 256 distinct method names; counts beyond that are dropped silently. Standard EVM RPC has ~70 methods, so the cap only matters under a buggy or hostile caller.
+- **Caller bugs don't evict healthy URLs.** A malformed `eth_getBlockByNumber` block argument (anything that isn't `/^0x[0-9a-fA-F]+$/`) skips the validating HyperSync path instead of being charged as a tier failure.
+- **Cross-worker stats files are private.** The stats directory is created with `0o700` and each worker's file with `0o600`, so a co-tenant on the same host can't read your operational signal or poison the aggregator. If you pass a custom `statsDir`, point it at an app-private location.
+
 ## Configuration
 
 ```typescript
@@ -88,8 +99,9 @@ createPrismTransport({
   // HyperSync behavior
   disableHyperSyncBlockFetch: false, // skip HyperSync for block requests
 
-  // Hard cap on response body size, in bytes. Guards against a misbehaving
-  // provider OOMing the indexer with a multi-gigabyte response.
+  // Hard cap on response body size, in bytes. Enforced by streaming the body
+  // and aborting once exceeded — chunked encoding and lying Content-Length
+  // headers can't bypass it.
   maxResponseBytes: 50 * 1024 * 1024, // default: 50 MiB
 
   // Circuit breaker
