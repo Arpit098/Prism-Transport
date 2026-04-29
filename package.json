@@ -1,0 +1,67 @@
+{
+  "name": "prism-transport",
+  "version": "0.1.0",
+  "description": "Method-aware EVM RPC transport for viem — splits requests across HyperSync, public, and paid tiers with circuit breaker, round-robin load balancing, and a bounded fallback queue.",
+  "type": "module",
+  "main": "./dist/prism-transport.cjs",
+  "module": "./dist/prism-transport.js",
+  "types": "./dist/prism-transport.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/prism-transport.d.ts",
+        "default": "./dist/prism-transport.js"
+      },
+      "require": {
+        "types": "./dist/prism-transport.d.cts",
+        "default": "./dist/prism-transport.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "viem": "^2.0.0"
+  },
+  "dependencies": {
+    "p-queue": "^9.1.0"
+  },
+  "overrides": {
+    "@noble/curves": "1.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@vitest/coverage-v8": "^4.1.5",
+    "tsup": "^8.4.0",
+    "typescript": "^5.2.2",
+    "viem": "^2.21.3",
+    "vitest": "^4.0.18"
+  },
+  "keywords": [
+    "evm",
+    "rpc",
+    "transport",
+    "viem",
+    "circuit-breaker",
+    "round-robin",
+    "failover",
+    "blockchain",
+    "ethereum"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}
