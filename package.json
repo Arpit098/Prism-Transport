@@ -1,6 +1,6 @@
 {
   "name": "prism-transport",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Method-aware EVM RPC transport for viem — splits requests across HyperSync, public, and paid tiers with circuit breaker, round-robin load balancing, and a bounded fallback queue.",
   "type": "module",
   "main": "./dist/prism-transport.cjs",
@@ -61,6 +61,14 @@
     "ethereum"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arpit098/Prism-Transport.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Arpit098/Prism-Transport/issues"
+  },
+  "homepage": "https://github.com/Arpit098/Prism-Transport#readme",
   "engines": {
     "node": ">=20"
   }
